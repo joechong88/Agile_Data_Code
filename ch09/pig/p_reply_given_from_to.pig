@@ -30,6 +30,9 @@ rmf /tmp/sent_count_overall_replies.txt
 rmf /tmp/p_sent_from_to.txt
 rmf /tmp/no_reply_ratios.txt
 
+rmf /tmp/has_reply.txt
+rmf /tmp/no_reply.txt
+
 -- Count both from addresses and reply_to addresses as 
 emails = load '/tmp/gmail_data' using AvroStorage();
 clean_emails = filter emails by (from.address is not null) and (reply_tos is null);
