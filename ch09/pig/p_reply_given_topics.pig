@@ -1,10 +1,10 @@
 /* Set Home Directory - where we install software */
-%default HOME `echo \/me/Software/Software/`
+%default HOME `echo /usr/local`
 
 /* Avro uses json-simple, and is in piggybank until Pig 0.12, where AvroStorage and TrevniStorage are builtins */
-REGISTER /me/Software/pig/build/ivy/lib/Pig/avro-1.5.3.jar
-REGISTER /me/Software/pig/build/ivy/lib/Pig/json-simple-1.1.jar
-REGISTER /me/Software/pig/contrib/piggybank/java/piggybank.jar
+REGISTER $HOME/pig/build/ivy/lib/Pig/avro-1.7.4.jar
+REGISTER $HOME/pig/build/ivy/lib/Pig/json-simple-1.1.jar
+REGISTER $HOME/pig/contrib/piggybank/java/piggybank.jar
 
 DEFINE AvroStorage org.apache.pig.piggybank.storage.avro.AvroStorage();
 

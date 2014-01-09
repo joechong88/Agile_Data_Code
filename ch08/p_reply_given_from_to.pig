@@ -1,17 +1,17 @@
 /* Set Home Directory - where we install software */
-%default HOME `echo \$HOME/Software/`
+%default HOME `echo /usr/local`
 
 /* Avro uses json-simple, and is in piggybank until Pig 0.12, where AvroStorage and TrevniStorage are builtins */
-REGISTER $HOME/pig/build/ivy/lib/Pig/avro-1.5.3.jar
+REGISTER $HOME/pig/build/ivy/lib/Pig/avro-1.7.4.jar
 REGISTER $HOME/pig/build/ivy/lib/Pig/json-simple-1.1.jar
 REGISTER $HOME/pig/contrib/piggybank/java/piggybank.jar
 
 DEFINE AvroStorage org.apache.pig.piggybank.storage.avro.AvroStorage();
 
 /* MongoDB libraries and configuration */
-REGISTER $HOME/mongo-hadoop/mongo-2.10.1.jar
-REGISTER $HOME/mongo-hadoop/core/target/mongo-hadoop-core-1.1.0-SNAPSHOT.jar
-REGISTER $HOME/mongo-hadoop/pig/target/mongo-hadoop-pig-1.1.0-SNAPSHOT.jar
+REGISTER $HOME/mongo-hadoop/mongo-java-driver-2.11.3.jar
+REGISTER $HOME/mongo-hadoop/core/target/mongo-hadoop-core-1.2.0.jar
+REGISTER $HOME/mongo-hadoop/pig/target/mongo-hadoop-pig-1.2.0.jar
 
 DEFINE MongoStorage com.mongodb.hadoop.pig.MongoStorage();
 
@@ -28,7 +28,7 @@ rmf /tmp/overall_replies.txt
 rmf /tmp/smooth_distributions.avro
 
 -- Count both from addresses and reply_to addresses as 
-emails = load '/me/Data/test_mbox' using AvroStorage();
+emails = load '/tmp/gmail_data' using AvroStorage();
 clean_emails = filter emails by (from.address is not null) and (reply_tos is null);
 sent_emails = foreach clean_emails generate from.address as from, flatten(tos.address) as to, message_id;
 
@@ -72,5 +72,3 @@ overall_replies = foreach (group sent_replies all) generate 'overall' as key:cha
                                                             SUM(sent_replies.reply_counts::total) as replies,
                                                             (double)SUM(sent_replies.reply_counts::total)/(double)SUM(sent_replies.sent_counts::total) as reply_ratio; 
 store overall_replies into '/tmp/overall_replies.txt';
-
-

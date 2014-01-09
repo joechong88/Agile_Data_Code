@@ -12,7 +12,7 @@ DEFINE LENGTH org.apache.pig.piggybank.evaluation.string.LENGTH();
 REGISTER $HOME/varaha/lib/*.jar /* Varaha has a good tokenizer */
 REGISTER $HOME/varaha/target/varaha-1.0-SNAPSHOT.jar 
 
-DEFINE TokenizeText varaha.text.TokenizeText();
+DEFINE TokenizeText varaha.text.TokenizeText('1', '1');
 
 set default_parallel 20
 
@@ -24,7 +24,7 @@ register 'udfs.py' using jython as funcs;
 import 'ntfidf.macro';
 
 /* Load emails and trim unneeded fields */
-emails = load '/me/Data/test_mbox' using AvroStorage();
+emails = load '/tmp/gmail_data' using AvroStorage();
 id_body_address = foreach emails generate message_id, body, from.address as address;
 
 /* Project and latten to message_id/address/token and basic filter */

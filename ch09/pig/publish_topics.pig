@@ -1,10 +1,10 @@
 /* Set Home Directory - where we install software */
-%default HOME `echo \$HOME/Software/`
+%default HOME `echo /usr/local`
 
-/* MongoDB libraries and configuration */
-REGISTER $HOME/mongo-hadoop/mongo-2.10.1.jar
-REGISTER $HOME/mongo-hadoop/core/target/mongo-hadoop-core-1.1.0-SNAPSHOT.jar
-REGISTER $HOME/mongo-hadoop/pig/target/mongo-hadoop-pig-1.1.0-SNAPSHOT.jar
+/* Avro uses json-simple, and is in piggybank until Pig 0.12, where AvroStorage and TrevniStorage are builtins */
+REGISTER $HOME/pig/build/ivy/lib/Pig/avro-1.7.4.jar
+REGISTER $HOME/pig/build/ivy/lib/Pig/json-simple-1.1.jar
+REGISTER $HOME/pig/contrib/piggybank/java/piggybank.jar
 
 DEFINE MongoStorage com.mongodb.hadoop.pig.MongoStorage();
 
