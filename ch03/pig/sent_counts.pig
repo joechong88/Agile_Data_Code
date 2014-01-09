@@ -1,16 +1,16 @@
-/* Set Home Directory - where we install software */
-%default HOME `echo \$HOME/Software/`
+/* Set Home Directory - where we install software Pig */
+%default HOME '/usr/local/pig'
 
-REGISTER $HOME/pig/build/ivy/lib/Pig/avro-1.5.3.jar
-REGISTER $HOME/pig/build/ivy/lib/Pig/json-simple-1.1.jar
-REGISTER $HOME/pig/contrib/piggybank/java/piggybank.jar
+REGISTER $HOME/build/ivy/lib/Pig/avro-1.7.4.jar
+REGISTER $HOME/build/ivy/lib/Pig/json-simple-1.1.jar
+REGISTER $HOME/contrib/piggybank/java/piggybank.jar
 
 DEFINE AvroStorage org.apache.pig.piggybank.storage.avro.AvroStorage();
 
 rmf /tmp/sent_counts.txt
 
 /* Load the emails in avro format (edit the path to match where you saved them) using the AvroStorage UDF from Piggybank */
-messages = LOAD '/me/Data/test_mbox' USING AvroStorage();
+messages = LOAD '/tmp/gmail_data' USING AvroStorage();
 
 /* Filter nulls, they won't help */
 messages = FILTER messages BY (from IS NOT NULL) AND (tos IS NOT NULL);

@@ -40,10 +40,14 @@ class GmailSlurper(object):
   # part_id will be helpful one we're splitting files among multiple slurpers
   def init_avro(self, output_path, part_id, schema_path):
     output_dir = None
+    output_dirtmp = None	# Handle Avro Write Error 
     if(type(output_path) is str):
       output_dir = self.init_directory(output_path)
+      output_dirtmp = self.init_directory(output_path + 'tmp')	# Handle Avro Write Error 
     out_filename = '%(output_dir)s/part-%(part_id)s.avro' % \
       {"output_dir": output_dir, "part_id": str(part_id)}
+    out_filenametmp = '%(output_dirtmp)s/part-%(part_id)s.avro' % \
+      {"output_dirtmp": output_dirtmp, "part_id": str(part_id)}	# Handle Avro Write Error 
     self.schema = open(schema_path, 'r').read()
     email_schema = schema.parse(self.schema)
     rec_writer = io.DatumWriter(email_schema)
@@ -52,7 +56,13 @@ class GmailSlurper(object):
       rec_writer,
       email_schema
     )
-  
+    # CREATE A TEMP AvroWriter that can be used to workaround the UnicodeDecodeError when writing into AvroStorage
+    self.avro_writertmp = datafile.DataFileWriter(
+    	open(out_filenametmp, 'wb'),
+    	rec_writer,
+    	email_schema
+		)
+		  
   def init_folder(self, folder):
     self.imap_folder = folder
     status, count = self.imap.select(folder)      
@@ -118,14 +128,28 @@ class GmailSlurper(object):
   
   def shutdown(self):
     self.avro_writer.close()
+    self.avro_writertmp.close()	# Handle Avro write errors
     self.imap.close()
     self.imap.logout()
   
   def write(self, record):
-    self.avro_writer.append(record)
-  
+		#self.avro_writer.append(record)
+    # BEGIN - Handle errors when writing into Avro storage
+    try:
+    	self.avro_writertmp.append(record)
+    	self.avro_writer.append(record)
+    		
+    except UnicodeDecodeError:
+    	sys.stderr.write("ERROR IN Writing EMAIL to AvroWriterTmp for UnicodeDecode issue, SKIPPED ONE to AvroWriter\n")
+    	
+    except:
+			sys.stderr.write("ERROR IN Writing EMAIL to AvroWriterTmp, SKIPPED ONE to AvroWriter\n")
+			
+  	# END - Handle errors when writing into Avro storage
+  	
   def flush(self):
     self.avro_writer.flush()
+    self.avro_writertmp.flush()	# Handle Avro write errors
     print "Flushed avro writer..."
   
   def slurp(self):
@@ -134,9 +158,11 @@ class GmailSlurper(object):
         (status, email_hash, charset) = self.fetch_email(email_id)
         if(status == 'OK' and charset and 'thread_id' in email_hash and 'from' in email_hash):
           print email_id, charset, email_hash['thread_id']
+          
           self.write(email_hash)
           if((int(email_id) % 1000) == 0):
             self.flush()
+
         elif(status == 'ERROR' or status == 'PARSE' or status == 'UNICODE' or status == 'CHARSET' or status =='FROM'):
           sys.stderr.write("Problem fetching email id " + str(email_id) + ": " + status + "\n")
           continue
