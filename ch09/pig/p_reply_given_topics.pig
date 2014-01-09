@@ -8,17 +8,17 @@ REGISTER $HOME/pig/contrib/piggybank/java/piggybank.jar
 
 DEFINE AvroStorage org.apache.pig.piggybank.storage.avro.AvroStorage();
 
-REGISTER /me/Software/varaha/lib/*.jar /* */
-REGISTER /me/Software/varaha/target/varaha-1.0-SNAPSHOT.jar 
+REGISTER $HOME/varaha/lib/*.jar /* */
+REGISTER $HOME/varaha/target/varaha-1.0-SNAPSHOT.jar 
 
-DEFINE TokenizeText varaha.text.TokenizeText();
+DEFINE TokenizeText varaha.text.TokenizeText('1', '1');
 
 rmf /tmp/reply_rates.txt
 rmf /tmp/no_reply_rates.txt
 rmf /tmp/p_token.txt
 
 /* Load emails, trim fields to id/body */
-emails = load '/me/Data/test_mbox' using AvroStorage();
+emails = load '/tmp/gmail_data' using AvroStorage();
 id_body = foreach emails generate message_id, body;
 
 /* Tokenize text, count of each token per document */
