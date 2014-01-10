@@ -13,7 +13,7 @@ rmf /tmp/final_answer.txt
 
 results = load '../results.txt' as (message_id:chararray, p_tokens_weight:double, p_from_to_reply_weight:double, p_reply:double);
 
-emails = load '/me/Data/test_mbox' using AvroStorage();
+emails = load '/tmp/gmail_data' using AvroStorage();
 emails = foreach emails generate message_id, in_reply_to;
 
 with_results = join results by message_id left outer, emails by in_reply_to;
